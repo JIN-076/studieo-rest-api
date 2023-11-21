@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Studieo - 스터디 플랫폼</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    #main-content {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .main-buttons {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <a class="navbar-brand" href="#">|  Studieo  |</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/users/logout">로그아웃</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/users/myPage">마이페이지</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div id="main-content">
+  <h1>Studieo</h1>
+  <p>온라인/오프라인 스터디를 찾아보세요.</p>
+
+  <div class="main-buttons">
+    <div class="btn-group" role="group" aria-label="Main buttons">
+      <a href="/studies/createForm" class="btn btn-primary">스터디 생성</a>
+      <button type="button" class="btn btn-success">지도로 스터디 찾기</button>
+      <button type="button" class="btn btn-info">스터디 검색</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 서버 SSE 엔드포인트 URL
+    const participants = [[${participants}]]/* 여기에 Thymeleaf 문법을 추가하여 Participant 목록 가져오기 */;
+
+    // Participant 목록을 기반으로 SSE URL을 동적으로 생성하고 SSE 연결을 설정합니다.
+    participants.forEach(function (participant) {
+      const sseUrl = `/notification/${participant.studyId}`;
+      const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("sse", function (event) {
+      console.log(event.data);
+
+      const data = JSON.parse(event.data);
+
+      (async () => {
+        const showNotification = () => {
+          const notification = new Notification("스터디 참가 요청이 도착했습니다!", {
+            body: data.content
+          });
+
+          setTimeout(() => {
+            notification.close();
+          }, 10 * 1000);
+
+          notification.addEventListener('click', () => {
+            window.open(data.url, '_blank');
+          });
+        }
+
+        let granted = false;
+
+        if (Notification.permission === 'granted') {
+          granted = true;
+        } else if (Notification.permission !== 'denied') {
+          let permission = await Notification.requestPermission();
+          granted = permission === 'granted';
+        }
+
+        if (granted) {
+          showNotification();
+        }
+      })
+    })
+  })
+  });
+</script>
+
+</body>
+</html>
