@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>마이페이지 수정</title>
+  <style>
+    .field-error {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin-top: -30px;
+    }
+
+    .container {
+      width: 100%;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group input[readonly] {
+      background-color: #e9ecef;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+    }
+
+    .bg-light {
+      background-color: white!important;
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+    }
+
+    .navbar-nav .nav-item {
+      margin-right: 10px;
+    }
+
+    .mt-5 {
+      margin-top: 5rem!important;
+      width: 65%;
+    }
+
+    .custom-modal-content {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+    }
+
+    .custom-modal h3 {
+      margin-bottom: 5px;
+      font-size: 1.5rem; /* 스터디 신청 텍스트 크기 조정 */
+    }
+
+    .notification-buttons button {
+      flex: 1;
+      margin: 0 5px;
+    }
+  </style>
+  <script>
+    function form_submit() {
+      let form = document.querySelector('form');
+      form['email'].value = form['inputEmailPrefix'].value + '@' + form['domain-txt'].value
+
+      let year = form['inputBirthYear'].value;
+      let month = form['inputBirthMonth'].value.padStart(2, '0');
+      let day = form['inputBirthDay'].value.padStart(2, '0');
+      form['birthDate'].value = year + '-' + month + '-' + day;
+
+      return true;
+    }
+  </script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="">| Studieo |</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/users/logout">로그아웃</a>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="button" onclick="openNotificationPanel()">알림</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="mb-4">마이페이지 수정</h2>
+  <form method="POST" th:action="@{/users/myPage/edit}" th:object="${userEditRequestDto}" onsubmit="form_submit()">
+    <div class="form-group row">
+      <label for="loginId" class="col-sm-2 col-form-label">ID</label>
+      <div class="col-sm-10">
+        <input type="text" id="loginId" class="form-control" th:field="*{loginId}"
+               th:errorclass="field-error" placeholder="아이디" readonly>
+        <div class="field-error" th:errors="*{loginId}">ID 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="name" class="col-sm-2 col-form-label">이름</label>
+      <div class="col-sm-10">
+        <input type="text" id="name" class="form-control" th:field="*{name}"
+               th:errorclass="field-error" placeholder="이름">
+        <div class="field-error" th:errors="*{name}">이름 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="inputEmailPrefix" class="col-sm-2 col-form-label">이메일</label>
+      <div class="col-sm-3">
+        <input type="text" class="form-control" id="inputEmailPrefix" placeholder="이메일"
+               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''" />
+        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:field="*{email}">이메일 오류</div>
+      </div>
+      <div class="col-sm-1 text-center">@</div>
+      <div class="col-sm-3">
+        <input type="text" class="form-control" id="domain-txt" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+      </div>
+      <div class="col-sm-3">
+        <select class="form-control" id="emailDomain">
+          <option value="custom">직접 입력</option>
+          <option value="google.com">google.com</option>
+          <option value="naver.com">naver.com</option>
+          <option value="kakao.com">kakao.com</option>
+          <option value="hanmail.net">hanmail.net</option>
+        </select>
+      </div>
+      <input type="hidden" id="email" class="form-control" th:field="*{email}" th:errorclass="field-error">
+    </div>
+    <div class="form-group row">
+      <label for="age" class="col-sm-2 col-form-label">나이</label>
+      <div class="col-sm-10">
+        <input type="number" id="age" class="form-control" th:field="*{age}"
+               th:errorclass="field-error" placeholder="나이">
+        <div class="field-error" th:errors="*{age}">나이 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="nickname" class="col-sm-2 col-form-label">닉네임</label>
+      <div class="col-sm-10">
+        <input type="text" id="nickname" th:field="*{nickname}" class="form-control"
+               th:errorclass="field-error" placeholder="닉네임">
+        <div class="field-error" th:errors="*{nickname}">닉네임 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="password" class="col-sm-2 col-form-label">비밀번호</label>
+      <div class="col-sm-10">
+        <input type="password" id="password" class="form-control" th:field="*{password}"
+               th:errorclass="field-error" placeholder="비밀번호">
+        <div class="field-error" th:errors="*{password}">비밀번호 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="tel" class="col-sm-2 col-form-label">전화번호</label>
+      <div class="col-sm-10">
+        <input type="tel" id="tel" class="form-control" th:field="*{tel}"
+               th:errorclass="field-error" placeholder="전화번호">
+        <div class="field-error" th:errors="*{tel}">전화번호 오류</div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">성별</label>
+      <div class="col-sm-10" th:field="*{sex}">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="sex" id="male" value="male">
+          <label class="form-check-label" for="male">남성</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="sex" id="female" value="female">
+          <label class="form-check-label" for="female">여성</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="inputBirthYear" class="col-sm-2 col-form-label">생년월일</label>
+      <div class="col-sm-10">
+        <div class="form-row">
+          <div class="col">
+            <select class="form-control" id="inputBirthYear">
+              <option value="">년도 선택</option>
+            </select>
+            <div class="field-error" th:errors="*{birthDate}">생년월일 오류</div>
+          </div>
+          <div class="col">
+            <select class="form-control" id="inputBirthMonth" onchange="updateBirthDay()">
+              <option value="">월 선택</option>
+            </select>
+          </div>
+          <div class="col">
+            <select class="form-control" id="inputBirthDay">
+              <option value="">일 선택</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="birthDate" class="form-control" th:field="*{birthDate}"
+             th:errorclass="field-error">
+    </div>
+
+    <div class="form-group row">
+    <div class="col-sm-10 offset-sm-2">
+      <button type="submit" class="btn btn-primary" style="width: 100%">Save</button>
+    </div>
+  </div>
+    <div class="form-group row">
+      <div class="col-sm-10 offset-sm-2">
+        <a href="/" class="btn btn-secondary" style="width: 100%">Home</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-body">
+        <h3 class="custom-modal-title">스터디 신청이 도착했습니다!</h3>
+        <p class="mb-0" id="modal-notification-content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  const yearSelect = document.getElementById("inputBirthYear");
+  yearSelect.innerHTML = "<option value=''>년도 선택</option>";
+
+  for (let year = 1940; year <= 2023; year++) {
+    yearSelect.innerHTML += "<option value='" + year + "'>" + year + "</option>";
+  }
+
+  const monthSelect = document.getElementById("inputBirthMonth");
+  monthSelect.innerHTML = "<option value=''>월 선택</option>";
+
+  for (let month = 1; month <= 12; month++) {
+    monthSelect.innerHTML += "<option value='" + month + "'>" + month + "</option>";
+  }
+
+  function updateBirthDay() {
+    const year = document.getElementById("inputBirthYear").value;
+    const month = document.getElementById("inputBirthMonth").value;
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const daySelect = document.getElementById("inputBirthDay");
+    daySelect.innerHTML = "<option value=''>일 선택</option>";
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      daySelect.innerHTML += "<option value='" + day + "'>" + day + "</option>";
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const domainListEl = document.querySelector('#emailDomain');
+    const domainInputEl = document.querySelector('#domain-txt');
+
+    domainListEl.addEventListener('change', function (event) {
+      if (event.target.value !== "custom") {
+        domainInputEl.value = event.target.value;
+        domainInputEl.disabled = true;
+      } else {
+        domainInputEl.value = "";
+        domainInputEl.disabled = false;
+      }
+    });
+
+    const sseUrl = '/notification';
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("sse", function (event) {
+      if (event.data.startsWith("EventStream") === false) {
+        const data = JSON.parse(event.data);
+        console.log('Received SSE data:', data);
+        showCustomNotification(data);
+      }
+    });
+
+    function showCustomNotification(data) {
+      const modalNotificationContent = document.getElementById('modal-notification-content');
+      modalNotificationContent.textContent = data.content;
+
+      $('#customModal').modal('show');
+
+      setTimeout(() => {
+        $('#customModal').modal('hide');
+      }, 10 * 1000);
+    }
+  });
+</script>
+
+</body>
+</html>

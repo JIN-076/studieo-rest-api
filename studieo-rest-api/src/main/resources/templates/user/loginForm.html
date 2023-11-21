@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Login</title>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin-top: -50px;
+    }
+
+    .container {
+      width: 50%;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+    }
+  </style>
+  <script>
+    function setFormAction() {
+      const form = document.querySelector('form');
+      form.action += window.location.search;
+    }
+  </script>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h2 class="mb-4">Login</h2>
+  <form method="POST" action="/users/login" onsubmit="setFormAction()">
+    <div class="form-group">
+      <label for="loginId">ID</label>
+      <input type="text" class="form-control" id="loginId" name="loginId" placeholder="Enter your ID" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+
+  <form method="GET" action="/">
+    <div class="form-group mt-3">
+      <button type="submit" class="btn btn-secondary">Home</button>
+    </div>
+  </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

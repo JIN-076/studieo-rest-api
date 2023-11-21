@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>마이페이지</title>
+    <style>
+        .field-error {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin-top: -30px;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input[readonly] {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+
+        .bg-light {
+            background-color: white!important;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 10px;
+        }
+
+        .mt-5 {
+            margin-top: 5rem!important;
+            width: 65%;
+        }
+
+        .custom-modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+
+        .custom-modal h3 {
+            margin-bottom: 5px;
+            font-size: 1.5rem; /* 스터디 신청 텍스트 크기 조정 */
+        }
+
+        .notification-buttons button {
+            flex: 1;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="">| Studieo |</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/users/logout">로그아웃</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="button" onclick="openNotificationPanel()">알림</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 class="mb-4">마이페이지</h2>
+    <form method="GET" th:action="@{/users/mypage}" th:object="${user}">
+        <div class="form-group row">
+            <label for="loginId" class="col-sm-2 col-form-label">ID</label>
+            <div class="col-sm-10">
+                <input type="text" id="loginId" class="form-control" th:value="${user.loginId}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="name" class="col-sm-2 col-form-label">이름</label>
+            <div class="col-sm-10">
+                <input type="text" id="name" class="form-control" th:value="${user.name}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="email" class="col-sm-2 col-form-label">이메일</label>
+            <div class="col-sm-10">
+                <input type="text" id="email" class="form-control" th:value="${user.email.getEmail()}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="age" class="col-sm-2 col-form-label">나이</label>
+            <div class="col-sm-10">
+                <input type="text" id="age" class="form-control" th:value="${user.age}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="nickname" class="col-sm-2 col-form-label">닉네임</label>
+            <div class="col-sm-10">
+                <input type="text" id="nickname" class="form-control" th:value="${user.nickname}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="tel" class="col-sm-2 col-form-label">전화번호</label>
+            <div class="col-sm-10">
+                <input type="text" id="tel" class="form-control" th:value="${user.tel.getTel()}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="sex" class="col-sm-2 col-form-label">성별</label>
+            <div class="col-sm-10">
+                <input type="text" id="sex" class="form-control" th:value="${user.sex ? '남성' : '여성'}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="birthDate" class="col-sm-2 col-form-label">생년월일</label>
+            <div class="col-sm-10">
+                <input type="text" id="birthDate" class="form-control" th:value="${user.birthDate}" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-10 offset-sm-2">
+                <a href="/users/myPage/edit" class="btn btn-primary" style="width: 100%">Edit</a>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-10 offset-sm-2">
+                <a href="/" class="btn btn-secondary" style="width: 100%">Home</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-body">
+                <h3 class="custom-modal-title">스터디 신청이 도착했습니다!</h3>
+                <p class="mb-0" id="modal-notification-content"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    const sseUrl = '/notification';
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("sse", function (event) {
+        if (event.data.startsWith("EventStream") === false) {
+            const data = JSON.parse(event.data);
+            console.log('Received SSE data:', data);
+            showCustomNotification(data);
+        }
+    });
+
+    function showCustomNotification(data) {
+        const modalNotificationContent = document.getElementById('modal-notification-content');
+        modalNotificationContent.textContent = data.content;
+
+        $('#customModal').modal('show');
+
+        setTimeout(() => {
+            $('#customModal').modal('hide');
+        }, 10 * 1000);
+    }
+</script>
+
+</body>
+</html>
