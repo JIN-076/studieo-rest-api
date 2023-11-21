@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Studieo - 스터디 플랫폼</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .bg-light {
+      background-color: white!important;
+    }
+
+    #main-content {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .main-buttons {
+      margin-top: 20px;
+    }
+
+    #notification-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 0;
+      overflow-x: hidden;
+      transition: 0.5s;
+      background-color: white;
+      padding-top: 60px;
+      z-index: 1;
+    }
+
+    #notification-content {
+      padding: 16px;
+    }
+
+    .custom-modal-content {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 400px; /* 최대 가로폭 */
+    }
+
+    .custom-modal h3 {
+      margin-bottom: 5px;
+      font-size: 1.5rem; /* 스터디 신청 텍스트 크기 조정 */
+    }
+
+    .notification-item {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      padding: 10px;
+    }
+
+    .notification-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .notification-buttons button {
+      flex: 1;
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <a class="navbar-brand" href="">|  Studieo  |</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/users/logout">로그아웃</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/users/myPage">마이페이지</a>
+        </li>
+      </ul>
+      <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="button" id="notification-button">알림</button>
+    </div>
+  </div>
+</nav>
+
+<div id="main-content">
+  <h1>Studieo</h1>
+  <p>온라인/오프라인 스터디를 찾아보세요.</p>
+
+  <div class="main-buttons">
+    <div class="btn-group" role="group" aria-label="Main buttons">
+      <a href="/studies/createForm" class="btn btn-primary">스터디 생성</a>
+      <button type="button" class="btn btn-success">지도로 스터디 찾기</button>
+      <button type="button" class="btn btn-info">스터디 검색</button>
+    </div>
+  </div>
+</div>
+
+<!-- 알림 패널 -->
+<div id="notification-panel">
+  <div id="notification-content">
+    <!-- 알림 목록을 여기에 동적으로 표시 -->
+    <!-- 예: <p>새로운 알림: 내용</p> -->
+  </div>
+</div>
+
+<!-- 알림 모달 창 -->
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-body">
+        <h3 class="custom-modal-title">스터디 신청이 도착했습니다!</h3>
+        <p class="mb-0" id="modal-notification-content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sseUrl = '/notification';
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("sse", function (event) {
+      console.log('hello');
+      let data;
+      if (event.data.startsWith("EventStream") === false) {
+        data = JSON.parse(event.data);
+        console.log('Received SSE data:', data);
+        showCustomNotification(data);
+      }
+    });
+
+    function showCustomNotification(data) {
+      const modalNotificationContent = document.getElementById('modal-notification-content');
+      modalNotificationContent.textContent = data.content;
+
+      $('#customModal').modal('show');
+
+      setTimeout(() => {
+        $('#customModal').modal('hide');
+      }, 10 * 1000);
+    }
+
+    const panel = document.getElementById('notification-panel');
+    const content = document.getElementById('notification-content');
+
+    function fetchData(url) {
+      return new Promise(function(resolve, reject) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              const notifications = JSON.parse(xhr.responseText);
+              resolve(notifications);
+            } else {
+              reject(new Error('Failed to fetch data'));
+            }
+          }
+        };
+        xhr.open('GET', url, true);
+        xhr.send();
+      });
+    }
+
+    async function loadDataAndInit() {
+      try {
+        content.innerHTML = '';
+        const notifications = await fetchData('/api/notifications');
+
+        notifications.map(async notification => {
+          try {
+            const userData = await fetchData('api/users/' + notification.senderId);
+            const studyData = await fetchData('api/studies/' + notification.studyId);
+            const notificationItem = createNotificationItem(notification, userData, studyData);
+            content.appendChild(notificationItem);
+          } catch (error) {
+            console.error('Error fetching data: ', error);
+          }
+        });
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    loadDataAndInit();
+
+    function toggleNotificationPanel() {
+      panel.style.width = (panel.style.width === '400px') ? '0' : '400px';
+    }
+
+    function createNotificationItem(notification, user, study) {
+      const card = document.createElement('div');
+      card.classList.add('card', 'notification-item');
+
+      const cardBody = document.createElement('div');
+      cardBody.classList.add('card-body');
+
+      const content = document.createElement('p');
+      content.classList.add('card-text');
+      content.textContent = user.nickname + '님으로부터 ' + study.name + ' 스터디 참가 요청이 도착했습니다.';
+
+      const message = document.createElement('p');
+      message.classList.add('card-text');
+      message.textContent = notification.content;
+
+      const buttons = document.createElement('div');
+      buttons.classList.add('notification-buttons', 'mt-2');
+
+      const acceptButton = document.createElement('button');
+      acceptButton.classList.add('btn', 'btn-success');
+      acceptButton.textContent = '수락하기';
+      acceptButton.addEventListener('click', () => acceptNotification(notification.id, user.userId, study.studyId));
+
+      const rejectButton = document.createElement('button');
+      rejectButton.classList.add('btn', 'btn-danger');
+      rejectButton.textContent = '거절하기';
+      rejectButton.addEventListener('click', () => rejectNotification(notification.id));
+
+      const closeButton = document.createElement('button');
+      closeButton.classList.add('btn', 'btn-secondary');
+      closeButton.textContent = '닫기';
+      closeButton.addEventListener('click', () => closeNotification(notification.id));
+
+      buttons.appendChild(acceptButton);
+      buttons.appendChild(rejectButton);
+      buttons.appendChild(closeButton);
+
+      cardBody.appendChild(content);
+      cardBody.appendChild(message);
+      cardBody.appendChild(buttons);
+
+      card.appendChild(cardBody);
+
+      return card;
+    }
+
+    document.getElementById('notification-button').addEventListener('click', toggleNotificationPanel);
+  });
+
+  function acceptNotification(notificationId, userId, studyId) {
+
+    $.ajax({
+      url: 'api/participation/accept-participate',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ userId: userId, studyId: studyId }),
+      success: function (response, status, xhr) {
+        if (xhr.status === 200) {
+          window.location.reload();
+          console.log('accept completed!');
+        }
+      },
+      error: function (error) {
+        console.error('failed to accept!', error);
+      }
+    });
+  }
+
+  function rejectNotification(notificationId) {
+    // TODO: 거절 처리 로직 추가
+    console.log(`알림 ${notificationId}을 거절합니다.`);
+  }
+
+  function closeNotification(notificationId) {
+    // 해당 알림 아이템을 패널에서 삭제
+    const notificationItem = document.getElementById(`notification-item-${notificationId}`);
+    notificationItem.remove();
+    console.log(`알림 ${notificationId}을 닫습니다.`);
+  }
+</script>
+
+</body>
+</html>
