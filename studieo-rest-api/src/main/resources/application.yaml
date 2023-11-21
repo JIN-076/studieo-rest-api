@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studieo?serverTimeZone=Asia/Seoul&useUnicode=true&characterEncoding=UTF-8
+    username: bedev
+    password: Bedev@1234
+  thymeleaf:
+    prefix: classpath:/templates/
+    messages:
+      basename: errors
+  profiles:
+    active: default
+
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+#  http2:
+#    enabled: true
+#  ssl:
+#    key-store: classpath:studieo-keystore.p12
+#    key-store-password: password
+#    key-store-type: PKCS12
+#    key-alias: studieo-keystore
