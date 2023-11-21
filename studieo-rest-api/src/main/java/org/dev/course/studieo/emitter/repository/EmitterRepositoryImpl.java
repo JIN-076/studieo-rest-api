@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -38,12 +37,6 @@ public class EmitterRepositoryImpl implements EmitterRepository {
         return emitters.entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(id))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-
-    @Override
-    public void sendNotificationToUser(UUID userId, String data) {
-
     }
 
     @Override
