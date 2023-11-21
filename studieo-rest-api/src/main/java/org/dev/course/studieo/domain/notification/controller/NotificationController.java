@@ -2,7 +2,6 @@ package org.dev.course.studieo.domain.notification.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dev.course.studieo.domain.message.entity.Message;
 import org.dev.course.studieo.domain.notification.dto.NotificationResponse;
 import org.dev.course.studieo.domain.notification.entity.Notification;
 import org.dev.course.studieo.domain.notification.entity.NotificationDto;
@@ -73,7 +72,7 @@ public class NotificationController {
         return new ResponseEntity<>(httpHeaders, HttpStatus.FOUND);
     }
 
-    @GetMapping("/api/no현tifications")
+    @GetMapping("/api/notifications")
     public List<Notification> getNotification(SessionUser user) {
         NotificationDto notificationDto = NotificationMapper.INSTANCE.mapToDto(user.getUserId());
         return notificationService.findAllNotificationByUserId(notificationDto);
