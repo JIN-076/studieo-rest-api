@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스터디 목록</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .category-badge,
+        .studiesType-badge,
+        .recruitment-badge,
+        .times-badge {
+            border-radius: 20px;
+            padding: 8px 15px;
+            display: inline-block;
+            margin-top: 10px;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        .category-badge {
+            background-color: #74b9ff;
+        }
+
+        .studiesType-badge {
+            background-color: #ff7675;
+        }
+
+        .recruitment-badge {
+            background-color: #55efc4;
+        }
+
+        .times-badge {
+            background-color: #feca57;
+        }
+
+        /* 추가된 스타일 */
+        .clickable-card {
+            cursor: pointer;
+        }
+
+        .bg-light {
+            background-color: white!important;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 10px;
+        }
+
+        .mt-5 {
+            margin-top: 5rem!important;
+        }
+
+        .custom-modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+
+        .custom-modal h3 {
+            margin-bottom: 5px;
+            font-size: 1.5rem; /* 스터디 신청 텍스트 크기 조정 */
+        }
+
+        .notification-buttons button {
+            flex: 1;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="">| Studieo |</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/users/logout">로그아웃</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/users/myPage">마이페이지</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="button" onclick="openNotificationPanel()">알림</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2>스터디 목록</h2>
+    <hr>
+
+    <div th:object="${studies}">
+        <div th:each="study : ${studies}" class="card mb-3 clickable-card" style="border-radius: 10px;" th:attr="data-studyId=${study.studyId}" onclick="redirectToStudyDetails(this)">
+            <div class="card-body">
+                <h5 class="card-title" th:text="${study.name}">스터디 제목</h5>
+                <p class="card-text" th:text="${study.description}">스터디 설명이 여기에 들어갑니다.</p>
+
+                <div class="category-badge">
+                    <span th:text="${study.category.getDetail()}">Category Here</span>
+                </div>
+                <div class="studiesType-badge">
+                    <span th:text="${study.studyType.getValue() == 1 ? '온라인' : '오프라인'}">온라인</span>
+                </div>
+                <div class="recruitment-badge">
+                    <span th:text="${study.capacity - study.headCount}">3명 모집중</span>
+                </div>
+                <div class="times-badge">
+                    <span th:text="${study.times}"> 2회/주</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-body">
+                <h3 class="custom-modal-title">스터디 신청이 도착했습니다!</h3>
+                <p class="mb-0" id="modal-notification-content"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    function redirectToStudyDetails(element) {
+        const studyId = element.getAttribute("data-studyId");
+        window.location.href = '/studies/' + studyId;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const sseUrl = '/notification';
+        const eventSource = new EventSource(sseUrl);
+
+        eventSource.addEventListener("sse", function (event) {
+            if (event.data.startsWith("EventStream") === false) {
+                const data = JSON.parse(event.data);
+                console.log('Received SSE data:', data);
+                showCustomNotification(data);
+            }
+        });
+
+        function showCustomNotification(data) {
+            const modalNotificationContent = document.getElementById('modal-notification-content');
+            modalNotificationContent.textContent = data.content;
+
+            $('#customModal').modal('show');
+
+            setTimeout(() => {
+                $('#customModal').modal('hide');
+            }, 10 * 1000);
+        }
+    });
+</script>
+
+</body>
+
+</html>

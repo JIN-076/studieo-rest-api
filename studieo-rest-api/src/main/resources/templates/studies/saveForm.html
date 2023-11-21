@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Create Study</title>
+  <style>
+    .bg-light {
+      background-color: white!important;
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+    }
+
+    .navbar-nav .nav-item {
+      margin-right: 10px;
+    }
+
+    .mt-5 {
+      margin-top: 5rem!important;
+    }
+
+    .custom-modal-content {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+    }
+
+    .custom-modal h3 {
+      margin-bottom: 5px;
+      font-size: 1.5rem; /* 스터디 신청 텍스트 크기 조정 */
+    }
+
+    .notification-buttons button {
+      flex: 1;
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="">| Studieo |</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/users/logout">로그아웃</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/users/myPage">마이페이지</a>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="button" onclick="openNotificationPanel()">알림</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="mb-4">Create Study</h2>
+  <form id="studyForm" method="POST" th:action="@{/studies/create}" th:object="${studySaveRequestDto}">
+    <div class="form-group">
+      <label>Type:</label>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" id="online" name="studyType" value="ONLINE" checked>
+        <label class="form-check-label" for="online">Online</label>
+      </div>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" id="offline" name="studyType" value="OFFLINE">
+        <label class="form-check-label" for="offline">Offline</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Accept:</label>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" id="accept" name="isAccept" value="true" checked>
+        <label class="form-check-label" for="accept">수락 필요</label>
+      </div>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" id="nonAccept" name="isAccept" value="false">
+        <label class="form-check-label" for="nonAccept">수락 불필요</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Study Name:</label>
+      <input type="text" class="form-control" th:field="*{name}" required>
+    </div>
+    <div class="form-group">
+      <label>Details:</label>
+      <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
+    </div>
+    <div class="form-group">
+      <label>Topic:</label>
+      <input type="text" class="form-control" th:field="*{subject}" required>
+    </div>
+    <div class="form-group">
+      <label>Category:</label>
+      <select class="form-control" th:field="*{category}" required>
+        <option value="IT">IT</option>
+        <option value="LANGUAGE">Language</option>
+        <option value="HISTORY">History</option>
+        <!-- Add more categories as needed -->
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Qualifications:</label>
+      <textarea class="form-control" th:field="*{requirement}" rows="3"></textarea>
+    </div>
+    <div class="form-group" id="location-group">
+      <label>Location:</label>
+      <input type="text" class="form-control" th:field="*{address}" id="studyLocation" disabled>
+    </div>
+    <div class="form-group">
+      <label>Total Participants:</label>
+      <input type="number" class="form-control" th:field="*{capacity}" min="1" required>
+    </div>
+    <div class="form-group">
+      <label>Number of Sessions:</label>
+      <input type="number" class="form-control" th:field="*{times}" min="1" required>
+    </div>
+<!--    <div class="form-group">-->
+<!--      <label>Start Time:</label>-->
+<!--      <input type="time" class="form-control" name="startTime">-->
+<!--    </div>-->
+    <div class="form-group row">
+      <div class="col-sm-10 offset-sm-0">
+        <button type="submit" class="btn btn-primary">Register</button>
+      </div>
+    </div>
+  </form>
+
+  <form th:action="@{/}" th:method="GET">
+    <div class="form-group row">
+      <div class="col-sm-10 offset-sm-0">
+        <button type="submit" class="btn btn-secondary">Home</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-body">
+        <h3 class="custom-modal-title">스터디 신청이 도착했습니다!</h3>
+        <p class="mb-0" id="modal-notification-content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script>
+  $(document).ready(function () {
+    $('#studyLocation').prop('disabled', true);
+
+    $('input[name="studiesType"]').change(function () {
+      if ($('#online').is(':checked')) {
+        $('#studyLocation').prop('disabled', true);
+      } else if ($('#offline').is(':checked')) {
+        $('#studyLocation').prop('disabled', false);
+      }
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const sseUrl = '/notification';
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("sse", function (event) {
+      if (event.data.startsWith("EventStream") === false) {
+        const data = JSON.parse(event.data);
+        console.log('Received SSE data:', data);
+        showCustomNotification(data);
+      }
+
+      showCustomNotification(data);
+    });
+
+    function showCustomNotification(data) {
+      const modalNotificationContent = document.getElementById('modal-notification-content');
+      modalNotificationContent.textContent = data.content;
+
+      $('#customModal').modal('show');
+
+      setTimeout(() => {
+        $('#customModal').modal('hide');
+      }, 10 * 1000);
+    }
+  });
+</script>
+
+</body>
+</html>
